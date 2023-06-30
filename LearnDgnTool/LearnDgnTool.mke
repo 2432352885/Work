@@ -1,0 +1,95 @@
+PolicyFile = $(MDLMKI)MicroStationPolicy.mki
+
+appName   = LearnDgnTool
+
+baseDir         = $(_MakeFilePath)
+privateInc      = $(baseDir)
+
+
+MDLMKI = $(MSMDE)mki/
+MDLINC = ${MSMDE}include/
+
+%include $(MDLMKI)mdl.mki
+#rCompOpts + -i$(MDLINC)
+cIncs + -I$(MDLINC)
+
+mdlLibs = $(MSMDE)library/
+
+#privateInc = $(baseDir)
+#langSpec   = $(baseDir)english/
+#------------------------------------------------------------------------
+# mdl.mki contains the default rules for creating .rsc, .mo, etc files
+#------------------------------------------------------------------------
+#%include mdl.mki
+
+#----------------------------------------------------------
+# Create needed output directories in case they don't exist
+#----------------------------------------------------------
+always:
+    !~@mkdir $(o)
+    !~@mkdir $(rscObjects)
+    !~@mkdir $(reqdObjs)
+
+# Search in $(o) for command table resources
+dirToSearch = $(o)
+%include $(MDLMKI)cincapnd.mki
+
+#------------------------------------------------------------------------
+# Define macros for files included in our link and resource merge
+#------------------------------------------------------------------------
+
+bclassRscs = $(o)$(appName)cmd.rsc 
+
+#------------------------------------------------------------------------
+# Generate command table include & resource file using rcomp
+#------------------------------------------------------------------------
+$(baseDir)$(appName)cmd.h        : $(baseDir)$(appName)cmd.r
+
+$(o)$(appName)cmd.rsc           : $(baseDir)$(appName)cmd.r
+
+$(mdlapps)$(appName).ma         : $(bclassRscs)
+    $(msg)
+    > $(o)make.opt
+    -o$@
+    $(bclassRscs)
+    <
+    $(RLibCmd) @$(o)make.opt
+    ~time
+
+#------------------------------------------------
+#   Set up to use dlmcomp.mki and dlmlink.mki
+#------------------------------------------------
+dlmObjs = \
+$(o)PlaceCircleTool$(oext) \
+$(o)$(appName)$(oext)
+
+#DLM_NO_DELAYLOAD        = 1
+DLM_NO_DLS              = 1             # USE DLLEXPORT IN .CPP
+DLM_NO_DEF              = 1
+DLM_NOENTRY             = 1
+DLM_NO_MANIFEST         = 1
+DLM_NO_SIGN             = 1
+DLM_OBJECT_DEST         = $(o)
+#DLM_LIBDEF_SRC          = $(baseDir)
+DLM_DEST                = $(mdlapps)
+DLM_NAME                = $(appName)
+DLM_OBJECT_FILES        = $(dlmObjs)
+DLM_SPECIAL_LINKOPT     = -fixed:no
+LINKER_LIBRARIES		= $(mdlLibs)bentley.lib \
+                          $(mdlLibs)mdlbltin.lib \
+                          $(mdlLibs)BentleyGeom.lib \
+                          $(mdlLibs)DgnPlatform.lib \
+                          $(mdlLibs)dgnview.lib \
+                          $(mdlLibs)BentleyAllocator.lib
+
+#----------------------------------------------------------------------
+#   Compile the source files for the DLM
+#----------------------------------------------------------------------
+$(o)$(appName)$(oext)           : $(baseDir)$(appName).cpp
+
+$(o)PlaceCircleTool$(oext)           : $(baseDir)PlaceCircleTool.cpp
+
+%include $(MDLMKI)dlmlink.mki
+
+
+

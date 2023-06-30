@@ -130,6 +130,7 @@ void createAComplexShape(WCharCP unparsed)
 	pts[0] = pts[1] = pts[2] = basePt;
 	pts[1].x += g_1mu*0.3;    pts[1].y += g_1mu*0.7;
 	pts[0].x += g_1mu;        pts[0].y += g_1mu;
+	//三个初始点初始化圆弧
 	DEllipse3d arcPts = DEllipse3d::FromPointsOnArc(pts[2], pts[1], pts[0]);
 	CurveVectorPtr pCurveVec = CurveVector::Create(CurveVector::BOUNDARY_TYPE_Outer);
 	pCurveVec->Add(ICurvePrimitive::CreateArc(arcPts));
@@ -151,6 +152,7 @@ void createAProjectedSolid(WCharCP unparsed)
 	pts[4].x = pts[3].x + g_1mu / 2;   pts[4].y = pts[3].y;               pts[4].z = pts[0].z;
 	pts[5].x = pts[4].x;               pts[5].y = pts[0].y;               pts[5].z = pts[0].z;
 
+	//CreateLinear从xyz是数据创建一行字符串或者多边形
 	CurveVectorPtr pCurveVec = CurveVector::CreateLinear(pts, 6, CurveVector::BOUNDARY_TYPE_Outer);
 	DVec3d extrusionVec = DVec3d::From(0, 0, g_1mu);
 	DgnExtrusionDetail  data(pCurveVec, extrusionVec, true);
